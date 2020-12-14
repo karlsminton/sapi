@@ -1,34 +1,38 @@
 import Vapor
 import Fluent
-import FluentProvider
 
+/*
+ * Fix with this https://theswiftdev.com/get-started-with-the-fluent-orm-framework-in-vapor-4/
+ */
 final class Product: Model {
-    var storage = Storage()
+    static let schema = "products"
+    
+    @ID(key: .id)
+    var id: UUID?
+    
+    @Field(key: "name")
     var name: String
-    var price: String
+    
+    @Field(key: "sku")
     var sku: String
     
-    init(
-        name: String,
-        price: String,
-        sku: String
-    ) {
-        self.name = name
-        self.price = price
-        self.sku = sku
+    @Field(key: "price")
+    var price: String
+    
+    init() {}
+}
+
+struct CreateProduct: Migration {
+    func prepare(on database: Database) -> EventLoopFuture<Void> {
+        database.schema(Product.schema)
+            .id()
+            .field("name", .string)
+            .field("sku", .string)
+            .field("price", .string)
+            .create()
     }
     
-    func makeRow() throws -> Row {
-        var row = Row()
-        try row.set("name", name)
-        try row.set("price", price)
-        try row.set("sku", sku)
-        return row
-    }
-    
-    init(row: Row) throws {
-        self.name = try row.get("name")
-        self.price = try row.get("price")
-        self.sku = try row.get("sku")
+    func revert(on database: Database) -> EventLoopFuture<Void> {
+        database.schema(Product.schema).delete()
     }
 }

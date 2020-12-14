@@ -8,6 +8,7 @@ public func configure(_ app: Application) throws {
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     app.databases.use(.mysql(hostname: "localhost", username: "root", password: "root", database: "vapor"), as: .mysql)
 
+    app.migrations.add(CreateProduct())
     // register routes
     try routes(app)
 }
