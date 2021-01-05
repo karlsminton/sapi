@@ -4,11 +4,27 @@ import Fluent
 /*
  * Fix with this https://theswiftdev.com/get-started-with-the-fluent-orm-framework-in-vapor-4/
  */
-final class Product: Model {
+final class Product: Model, Content {
     static let schema = "products"
     
-    @ID(key: .id)
-    var id: UUID?
+    struct Input: Content {
+        let name: String
+        let sku: String
+        let price: String
+    }
+    
+    struct Output: Content {
+        let id: Int?
+        let name: String
+        let sku: String
+        let price: String
+    }
+    
+//    @ID(key: .id)
+//    var id: Int
+    
+    @ID(custom: "id")
+    var id: Int?
     
     @Field(key: "name")
     var name: String
@@ -20,19 +36,15 @@ final class Product: Model {
     var price: String
     
     init() {}
-}
-
-struct CreateProduct: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema(Product.schema)
-            .id()
-            .field("name", .string)
-            .field("sku", .string)
-            .field("price", .string)
-            .create()
-    }
     
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema(Product.schema).delete()
+    init (id: Int? = nil,
+          name: String,
+          sku: String,
+          price: String
+    ) {
+        self.id = id
+        self.name = name
+        self.sku = sku
+        self.price = price
     }
 }

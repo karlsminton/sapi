@@ -6,7 +6,8 @@ import FluentMySQLDriver
 public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-    app.databases.use(.mysql(hostname: "localhost", username: "root", password: "root", database: "vapor"), as: .mysql)
+    //todo - remove the "certificateVerification: .none" for production
+    app.databases.use(.mysql(hostname: "127.0.0.1", username: "root", password: "", database: "vapor", tlsConfiguration: .forClient(certificateVerification: .none)), as: .mysql)
 
     app.migrations.add(CreateProduct())
     // register routes
