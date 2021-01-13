@@ -20,9 +20,6 @@ final class Product: Model, Content {
         let price: String
     }
     
-//    @ID(key: .id)
-//    var id: Int
-    
     @ID(custom: "id")
     var id: Int?
     
@@ -37,10 +34,11 @@ final class Product: Model, Content {
     
     init() {}
     
-    init (id: Int? = nil,
-          name: String,
-          sku: String,
-          price: String
+    init (
+        id: Int? = nil,
+        name: String,
+        sku: String,
+        price: String
     ) {
         self.id = id
         self.name = name

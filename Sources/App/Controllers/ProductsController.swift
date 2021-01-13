@@ -30,14 +30,10 @@ struct ProductsController: RouteCollection {
         return product.create(on: req.db).map { product }
     }
     
-    func update(req: Request) throws -> String {
-        let id = req.parameters.get("id")! as Int? ?? nil
-        let body = req.content
-        let product = Product.find(id, on: req.db).unwrap(or: Abort(.badGateway)).map {
-            Product(id: $0.id, name: $0.name, sku: $0.sku, price: $0.price)
-        }
-        //product
-        return ""
+    func update(req: Request) throws -> EventLoopFuture<Product> {
+        //let id = req.parameters.get("id") as Int? ?? nil
+        let product = try req.content.decode(Product.self)
+        return product.update(on: req.db).map { product }
     }
     
     func delete(req: Request) throws -> String {

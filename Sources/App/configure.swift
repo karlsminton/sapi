@@ -10,6 +10,7 @@ public func configure(_ app: Application) throws {
     app.databases.use(.mysql(hostname: "127.0.0.1", username: "root", password: "", database: "vapor", tlsConfiguration: .forClient(certificateVerification: .none)), as: .mysql)
 
     app.migrations.add(CreateProduct())
+    app.migrations.add(CreateCustomer())
     // register routes
     try routes(app)
 }
