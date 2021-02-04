@@ -5,11 +5,9 @@ struct CustomersController: RouteCollection {
     func boot (routes: RoutesBuilder) throws {
         let customer = routes.grouped("customer")
         customer.post(use: create)
-        customer.get(use: index)
         
         customer.group(":id") { customer in
             customer.get(use: read)
-            customer.put(use: update)
             customer.delete(use: delete)
         }
     }
@@ -17,10 +15,6 @@ struct CustomersController: RouteCollection {
     func create(req: Request) throws -> EventLoopFuture<Customer> {
         let customer = try req.content.decode(Customer.self)
         return customer.create(on: req.db).map { customer }
-    }
-    
-    func index(req: Request) throws -> EventLoopFuture<[Customer]> {
-        return Customer.query(on: req.db).all()
     }
     
     func read(req: Request) throws -> EventLoopFuture<Customer.Output> {
@@ -38,10 +32,6 @@ struct CustomersController: RouteCollection {
             }
         }
         throw Abort(.notFound)
-    }
-    
-    func update(req: Request) throws -> String {
-        return ""
     }
     
     func delete(req: Request) throws -> String {

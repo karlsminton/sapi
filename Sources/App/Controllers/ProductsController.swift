@@ -5,15 +5,20 @@ struct ProductsController: RouteCollection {
     func boot (routes: RoutesBuilder) throws {
         let products = routes.grouped("products")
         products.post(use: create)
+        products.get(use: index)
         
         products.group(":id") { product in
-            product.get(use: index)
-            product.put(use: update)
+            product.get(use: read)
+            products.put(use: update)
             product.delete(use: delete)
         }
     }
     
-    func index(req: Request) throws -> EventLoopFuture<Product.Output> {
+    func index(req: Request) throws -> EventLoopFuture<[Product]> {
+        return Product.query(on: req.db).all()
+    }
+    
+    func read(req: Request) throws -> EventLoopFuture<Product.Output> {
         let id = req.parameters.get("id") as Int? ?? nil
         if (id != nil) {
             // todo fix issue here
@@ -30,11 +35,38 @@ struct ProductsController: RouteCollection {
         return product.create(on: req.db).map { product }
     }
     
-    func update(req: Request) throws -> EventLoopFuture<Product> {
-        //let id = req.parameters.get("id") as Int? ?? nil
-        let product = try req.content.decode(Product.self)
-        return product.update(on: req.db).map { product }
+    func update(req: Request) throws -> EventLoopFuture<Product.Output> {
+        let id = req.parameters.get("id") as Int? ?? 0
+        let product = try req.content.decode(Product.Input.self)
+        
+        return Product.find(id, on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .flatMap { prod in
+                prod.name = product.name
+                prod.sku = product.sku
+                prod.price = product.price
+                return prod.save(on: req.db)
+                    .map {Product.Output(id: prod.id, name: prod.name, sku: prod.sku, price: prod.price)}
+            }
     }
+    
+    /*
+     
+     func update(req: Request) throws -> EventLoopFuture<Todo.Output> {
+             guard let id = req.parameters.get("id", as: UUID.self) else {
+                 throw Abort(.badRequest)
+             }
+             let input = try req.content.decode(Todo.Input.self)
+             return Todo.find(id, on: req.db)
+                 .unwrap(or: Abort(.notFound))
+                 .flatMap { todo in
+                     todo.title = input.title
+                     return todo.save(on: req.db)
+                         .map { Todo.Output(id: todo.id!.uuidString, title: todo.title) }
+                 }
+         }
+     
+     */
     
     func delete(req: Request) throws -> String {
         let id = req.parameters.get("id") as Int? ?? nil
